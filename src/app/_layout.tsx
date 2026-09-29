@@ -1,3 +1,4 @@
+import { useTheme } from "@/presentation/theme/hooks/use-theme";
 import { useFonts } from "expo-font";
 import {
   DarkTheme,
@@ -7,13 +8,15 @@ import {
   ThemeProvider,
 } from "expo-router";
 import { useEffect } from "react";
-import { Text, useColorScheme } from "react-native";
+import { useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { background } = useTheme();
+
   const [loaded, error] = useFonts({
     kanitBold: require("../../assets/fonts/Kanit-Bold.ttf"),
     kanitRegular: require("../../assets/fonts/Kanit-Regular.ttf"),
@@ -27,11 +30,14 @@ export default function TabLayout() {
   }, [loaded, error]);
   if (!loaded && !error) {
     SplashScreen.hideAsync();
-    return <Text style={{ fontSize: 300 }}>Keso</Text>;
   }
 
   return (
-    <GestureHandlerRootView>
+    <GestureHandlerRootView
+    // style={{
+    //   backgroundColor: background,
+    // }}
+    >
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Slot />
       </ThemeProvider>

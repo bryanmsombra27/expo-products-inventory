@@ -1,11 +1,13 @@
 import { StyleSheet } from "react-native";
 
+import LogOutIconButton from "@/presentation/auth/components/LogOutIconButton";
 import { ThemedText } from "@/presentation/theme/components/themed-text";
 import { ThemedView } from "@/presentation/theme/components/themed-view";
 
 export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
+      <LogOutIconButton />
       <ThemedText style={{ fontFamily: "kanitBold" }}>
         Index component page
       </ThemedText>

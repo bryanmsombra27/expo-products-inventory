@@ -1,4 +1,6 @@
+import LogOutIconButton from "@/presentation/auth/components/LogOutIconButton";
 import { useAuthStore } from "@/presentation/auth/store/useAuthStore";
+import { useTheme } from "@/presentation/theme/hooks/use-theme";
 import { Redirect, Stack } from "expo-router";
 import type { PropsWithChildren } from "react";
 import React, { useEffect } from "react";
@@ -11,6 +13,7 @@ const Styles = StyleSheet.create({});
 
 const CheckAuthenticationLayout = ({}: layoutProps): React.JSX.Element => {
   const { checkStatus, status } = useAuthStore();
+  const { background } = useTheme();
 
   useEffect(() => {
     checkStatus();
@@ -33,10 +36,21 @@ const CheckAuthenticationLayout = ({}: layoutProps): React.JSX.Element => {
   if (status == "unathenticated") return <Redirect href={"/auth/login"} />;
   return (
     <GestureHandlerRootView>
-      <Stack>
+      <Stack
+        screenOptions={{
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: background },
+          contentStyle: { backgroundColor: background },
+        }}
+      >
         <Stack.Screen
           name="/"
-          options={{ title: "Productos" }}
+          options={{
+            title: "Productos",
+            headerTitle: "Productos",
+            headerLeft: () => <LogOutIconButton />,
+            headerRight: () => <LogOutIconButton />,
+          }}
         />
       </Stack>
     </GestureHandlerRootView>
