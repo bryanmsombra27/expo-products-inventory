@@ -52,6 +52,15 @@ const CheckAuthenticationLayout = ({}: layoutProps): React.JSX.Element => {
             headerRight: () => <LogOutIconButton />,
           }}
         />
+        <Stack.Screen
+          name="product/[id]"
+          options={{
+            title: "Producto",
+            headerTitle: "Producto",
+            headerLeft: () => <LogOutIconButton />,
+            headerRight: () => <LogOutIconButton />,
+          }}
+        />
       </Stack>
     </GestureHandlerRootView>
   );
