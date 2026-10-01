@@ -2,12 +2,17 @@ import { Size } from "@/core/interfaces/product";
 import ProductImages from "@/presentation/products/components/ProductImages";
 import useCreateProduct from "@/presentation/products/hooks/useCreateProduct";
 import useProduct from "@/presentation/products/hooks/useProduct";
+import MenuIconButton from "@/presentation/theme/components/MenuIconButton";
 import { ThemedView } from "@/presentation/theme/components/themed-view";
 import ThemedButton from "@/presentation/theme/components/ThemedButton";
 import ThemedButtonGroup from "@/presentation/theme/components/ThemedButtonGroup";
 import ThemedTextInput from "@/presentation/theme/components/ThemedTextInput";
-import { Ionicons } from "@expo/vector-icons";
-import { Redirect, useLocalSearchParams, useNavigation } from "expo-router";
+import {
+  Redirect,
+  router,
+  useLocalSearchParams,
+  useNavigation,
+} from "expo-router";
 import { Formik } from "formik";
 import type { PropsWithChildren } from "react";
 import React, { useEffect, useRef } from "react";
@@ -34,9 +39,9 @@ const ProductId = ({}: ProductIdProps): React.JSX.Element => {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <Ionicons
-          name="camera-outline"
-          size={25}
+        <MenuIconButton
+          onPress={() => router.push("/camera")}
+          icon="camera-outline"
         />
       ),
     });
@@ -62,8 +67,8 @@ const ProductId = ({}: ProductIdProps): React.JSX.Element => {
   return (
     <Formik
       initialValues={data}
-      onSubmit={(val) =>
-        mutateAsync({
+      onSubmit={async (val) =>
+        await mutateAsync({
           ...val,
           id: productIdRef.current,
         })
