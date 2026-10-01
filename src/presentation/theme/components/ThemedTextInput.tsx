@@ -29,6 +29,7 @@ const ThemedTextInput = ({
     <View
       style={[
         {
+          flex: 1,
           ...styles.border,
           borderColor: isFocus ? primary : "#ccc",
         },
