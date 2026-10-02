@@ -1,10 +1,17 @@
 import { ThemedText } from "@/presentation/theme/components/themed-text";
 import { useTheme } from "@/presentation/theme/hooks/use-theme";
 import { Ionicons } from "@expo/vector-icons";
-import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
+import {
+  CameraType,
+  CameraView,
+  PermissionStatus,
+  useCameraPermissions,
+} from "expo-camera";
+import * as ExpoMediaLibrary from "expo-media-library";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
 import {
+  Alert,
   Image,
   StyleSheet,
   Text,
@@ -18,6 +25,30 @@ export default function CameaScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
   const [selectedImage, setSelectedImage] = useState<string>("");
+
+  const requestPermissions = async () => {
+    const cameraPermission = await requestPermission();
+
+    if (cameraPermission.status !== PermissionStatus.GRANTED) {
+      Alert.alert(
+        "Permiso Requerido",
+        "Es necesario que habilite el permiso de la camara para poder continuar...",
+      );
+      return;
+    }
+
+    const permission = await ExpoMediaLibrary.requestPermissionsAsync(false, [
+      "photo",
+    ]);
+    if (permission.accessPrivileges == "none") {
+      Alert.alert(
+        "Permiso Requerido",
+        "Es necesario que habilite el permiso de la galeria para poder continuar...",
+      );
+      return;
+    }
+  };
+
   if (!permission) {
     // Camera permissions are still loading.
     return <View />;
@@ -37,7 +68,7 @@ export default function CameaScreen() {
         <Text style={styles.message}>
           El permiso de la camara y la galeria es requerido{" "}
         </Text>
-        <TouchableOpacity onPress={requestPermission}>
+        <TouchableOpacity onPress={requestPermissions}>
           <ThemedText type="subtitle">Solicitar permiso</ThemedText>
         </TouchableOpacity>
       </View>
@@ -63,7 +94,16 @@ export default function CameaScreen() {
     router.dismiss();
   };
 
-  const pictureAccepted = () => {};
+  const pictureAccepted = async () => {
+    if (!selectedImage) return;
+
+    try {
+      const asset = await ExpoMediaLibrary.Asset.create(selectedImage);
+      Alert.alert("Exito", "foto guardada en la galeria");
+    } catch (error) {
+      Alert.alert("Error", "No fue posible guardar la foto en la galeria");
+    }
+  };
   const retakePhoto = () => {
     setSelectedImage("");
   };
