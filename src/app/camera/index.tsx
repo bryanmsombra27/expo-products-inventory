@@ -1,3 +1,4 @@
+import { useCameraStore } from "@/presentation/store/useCameraStore";
 import { ThemedText } from "@/presentation/theme/components/themed-text";
 import { useTheme } from "@/presentation/theme/hooks/use-theme";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,6 +8,7 @@ import {
   PermissionStatus,
   useCameraPermissions,
 } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
 import * as ExpoMediaLibrary from "expo-media-library";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
@@ -25,6 +27,7 @@ export default function CameaScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
   const [selectedImage, setSelectedImage] = useState<string>("");
+  const { addSelectedImage } = useCameraStore();
 
   const requestPermissions = async () => {
     const cameraPermission = await requestPermission();
@@ -94,11 +97,30 @@ export default function CameaScreen() {
     router.dismiss();
   };
 
+  const pickImages = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "images",
+      quality: 0.5,
+      aspect: [4, 3],
+      allowsEditing: true,
+      allowsMultipleSelection: true,
+      selectionLimit: 5,
+    });
+
+    if (result.canceled) return;
+
+    result.assets.forEach((image) => addSelectedImage(image.uri));
+
+    router.dismiss();
+  };
+
   const pictureAccepted = async () => {
     if (!selectedImage) return;
 
     try {
       const asset = await ExpoMediaLibrary.Asset.create(selectedImage);
+
+      addSelectedImage(selectedImage);
       Alert.alert("Exito", "foto guardada en la galeria");
     } catch (error) {
       Alert.alert("Error", "No fue posible guardar la foto en la galeria");
@@ -134,7 +156,7 @@ export default function CameaScreen() {
       <ShutterButton onPress={onShutterButtonPress} />
 
       <FlipCameraButton onPress={toggleCameraFacing} />
-      <GalleryButton />
+      <GalleryButton onPress={pickImages} />
       <ReturnCancelButton onPress={returnCancel} />
     </View>
   );

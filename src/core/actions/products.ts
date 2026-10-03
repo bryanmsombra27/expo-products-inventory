@@ -65,9 +65,11 @@ export const createUpdateProduct = async (product: Partial<Product>) => {
 const updateProduct = async (product: Partial<Product>) => {
   try {
     const { id, images = [], user, ...updateProduct } = product;
+    const checkedImages = await prepareImages(images);
+
     const { data } = await productsApi.patch(`/products/${id}`, {
       ...updateProduct,
-      images: saveImages(images),
+      images: checkedImages,
     });
 
     return data;
@@ -79,9 +81,12 @@ const updateProduct = async (product: Partial<Product>) => {
 const createProduct = async (product: Partial<Product>) => {
   try {
     const { id, images = [], user, ...createProduct } = product;
+
+    const checkedImages = await prepareImages(images);
+
     const { data } = await productsApi.post(`/products`, {
       ...createProduct,
-      images: saveImages(images),
+      images: checkedImages,
     });
 
     return data;
@@ -97,6 +102,39 @@ const productMapper = (product: Product): Product => {
   };
 };
 
-const saveImages = (images: string[]) => {
-  return images.map((image) => image.split("/").pop());
+const prepareImages = async (images: string[]) => {
+  const fileImages = images.filter((image) => image.startsWith("file"));
+  const currentImages = images.filter((image) => !image.startsWith("file"));
+
+  if (fileImages.length > 0) {
+    const uploadImagePromise = fileImages.map(uploadImages);
+
+    const uploadedImages = await Promise.all(uploadImagePromise);
+
+    currentImages.push(...uploadedImages);
+  }
+  return currentImages.map((image) => image.split("/").pop());
+};
+
+const uploadImages = async (image: string): Promise<string> => {
+  // const FormData = globalThis.FormData
+
+  const formData = new FormData() as any;
+  formData.append("file", {
+    uri: image,
+    type: "img/jpeg",
+    name: image.split("/").pop(),
+  });
+
+  const { data } = await productsApi.post<{ image: string }>(
+    "/files/product",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+
+  return data.image;
 };

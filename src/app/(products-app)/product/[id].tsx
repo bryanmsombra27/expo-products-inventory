@@ -2,6 +2,7 @@ import { Size } from "@/core/interfaces/product";
 import ProductImages from "@/presentation/products/components/ProductImages";
 import useCreateProduct from "@/presentation/products/hooks/useCreateProduct";
 import useProduct from "@/presentation/products/hooks/useProduct";
+import { useCameraStore } from "@/presentation/store/useCameraStore";
 import MenuIconButton from "@/presentation/theme/components/MenuIconButton";
 import { ThemedView } from "@/presentation/theme/components/themed-view";
 import ThemedButton from "@/presentation/theme/components/ThemedButton";
@@ -20,6 +21,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   View,
@@ -32,9 +34,16 @@ const Styles = StyleSheet.create({});
 const ProductId = ({}: ProductIdProps): React.JSX.Element => {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
-  const { data, error, isPending } = useProduct(`${id}`);
+  const { data, error, isPending, isFetching, refetch } = useProduct(`${id}`);
   const productIdRef = useRef<string>(`${id}`);
   const { mutateAsync } = useCreateProduct(productIdRef);
+  const { selectedImages, clearImages } = useCameraStore();
+
+  useEffect(() => {
+    return () => {
+      clearImages();
+    };
+  }, []);
 
   useEffect(() => {
     navigation.setOptions({
@@ -71,6 +80,7 @@ const ProductId = ({}: ProductIdProps): React.JSX.Element => {
         await mutateAsync({
           ...val,
           id: productIdRef.current,
+          images: [...val.images, ...selectedImages],
         })
       }
     >
@@ -78,8 +88,17 @@ const ProductId = ({}: ProductIdProps): React.JSX.Element => {
         <KeyboardAvoidingView
           behavior={Platform.OS == "ios" ? "padding" : undefined}
         >
-          <ScrollView>
-            <ProductImages images={data.images} />
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={isFetching}
+                onRefresh={async () => {
+                  await refetch();
+                }}
+              />
+            }
+          >
+            <ProductImages images={[...data.images, ...selectedImages]} />
 
             <ThemedView style={{ marginHorizontal: 10, marginTop: 20 }}>
               <ThemedTextInput

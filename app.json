@@ -40,7 +40,8 @@
       ],
       "expo-font",
       "expo-secure-store",
-      "expo-camera"
+      "expo-camera",
+      "expo-image-picker"
     ],
     "experiments": {
       "typedRoutes": true,
